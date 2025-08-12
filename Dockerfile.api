@@ -1,0 +1,16 @@
+# Simple Node API Dockerfile
+FROM node:20-alpine AS base
+WORKDIR /app
+
+COPY package*.json pnpm-lock.yaml* yarn.lock* .npmrc* ./ 2>/dev/null || true
+COPY . .
+
+# If monorepo with workspaces, uncomment the pnpm section:
+# RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
+# RUN pnpm install --frozen-lockfile
+
+# If single package (apps/api), install there:
+RUN cd apps/api && npm i --omit=dev && npm run build || true
+
+EXPOSE 8080
+CMD [ "node", "apps/api/dist/index.js" ]
